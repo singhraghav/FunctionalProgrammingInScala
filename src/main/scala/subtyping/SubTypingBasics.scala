@@ -1,17 +1,12 @@
 package subtyping
 
-//1. CoVariant
-//2. InVariant
-//3. Contravariant
-object SubTyping extends App {
-  abstract class Animal{
-    def name: String
-  }
+object SubTypingBasics extends App {
+  //1. CoVariant
+  //2. InVariant
+  //3. Contravariant
 
-  case class Dog(name: String) extends Animal
-  case class Cat(name: String) extends Animal
-
-  //Dog is a subtype of Animal i.e - Dog <: Animal
+  //From Animals
+  //Dog, Cat is a subtype of Animal i.e - Dog <: Animal
 
   //If Dog is subtype of Animal
   //1. Is List[Dog] also a subtype of List[Animal]
@@ -41,5 +36,6 @@ object SubTyping extends App {
   // but a vet for an animal is also a vet for a dog -> therefore it can be assigned to vet[Dog]
 
   val vetForDog: Vet[Dog] = vetForEveryAnimal // This is possible because Vet is Contravariant
+  // Vet[Animal] has become a subtype of Vet[Dog]
   vetForDog.heal(dog1)
 }
