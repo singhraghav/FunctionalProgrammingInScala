@@ -9,6 +9,9 @@ trait MySet[A] extends (A => Boolean) {
   def flatMap[B](f: A => MySet[B]): MySet[B]
   def filter(f: A => Boolean): MySet[A]
   def foreach(f: A => Unit): Unit
+  def -(element: A): MySet[A]
+  def &(another: MySet[A]): MySet[A]
+  def --(another: MySet[A]): MySet[A]
 
   override def apply(v1: A): Boolean = contains(v1)
 }
@@ -22,6 +25,9 @@ class EmptySet[A] extends MySet[A]{
   def flatMap[B](f: A => MySet[B]): MySet[B] = new EmptySet[B]
   def filter(f: A => Boolean): MySet[A] = this
   def foreach(f: A => Unit): Unit = ()
+  def &(another: MySet[A]): MySet[A] = another
+  def --(another: MySet[A]): MySet[A] = another
+  def -(element: A): MySet[A] = this
 }
 
 class NonEmptySet[A](head: A, tail: MySet[A]) extends MySet[A] {
@@ -39,6 +45,11 @@ class NonEmptySet[A](head: A, tail: MySet[A]) extends MySet[A] {
     f(head)
     tail.foreach(f)
   }
+
+  def &(another: MySet[A]): MySet[A] = filter(another)
+  def --(another: MySet[A]): MySet[A] = filter(x => !another(x))
+  def -(element: A): MySet[A] = if(head == element) tail else tail - element + head
+
 }
 object MySet{
   def apply[A](values: A*): MySet[A] = {
@@ -49,5 +60,8 @@ object MySet{
       }
     buildSet(values, new EmptySet[A])
   }
+}
 
+object main extends App {
+  MySet(1, 2, 3, 4, 5).--(MySet(1,2,3)).foreach(println)
 }
