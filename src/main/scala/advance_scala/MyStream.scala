@@ -57,7 +57,7 @@ class ConsStream[+A](hd: A, tl: => MyStream[A]) extends MyStream[A]{
   }
   def takeAsList(n: Int): List[A] = {
     def go(n: Int, currentStream: MyStream[A],acc: List[A]): List[A] = {
-      if(n == 0 || !this.isEmpty) acc
+      if(n == 0 || this.isEmpty) acc
       else
         go(n-1, currentStream.tail, currentStream.head +: acc)
     }
@@ -66,5 +66,17 @@ class ConsStream[+A](hd: A, tl: => MyStream[A]) extends MyStream[A]{
 }
 
 object MyStream {
-  def from[A](start: A)(generator: A => A): MyStream[A] = ???
+  def from[A](start: A)(generator: A => A): MyStream[A] = new ConsStream(start, MyStream.from(generator(start))(generator))
+}
+
+object MyStreamOps extends App {
+  val natural = MyStream.from(1)(_ + 1)
+  println(natural)
+  println(natural.head)
+  println(natural.tail.head)
+  println(natural.tail.tail.head)
+  val startFromZero = 0 #:: natural
+  println(startFromZero.head)
+//  startFromZero.take(10).foreach(println)
+  println(startFromZero.map(_ * 2).takeAsList(10))
 }
