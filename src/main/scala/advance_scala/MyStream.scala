@@ -1,13 +1,11 @@
 package advance_scala
 
-import scala.runtime.Nothing$
-
 abstract class MyStream[+A] {
   def isEmpty: Boolean
   def head: A
   def tail: MyStream[A]
   def #::[B >: A](element: B): MyStream[B]
-  def ++[B >: A](another: MyStream[B]): MyStream[B]
+  def ++[B >: A](another: => MyStream[B]): MyStream[B]
   def foreach(f: A => Unit): Unit
   def map[B](f: A => B): MyStream[B]
   def flatMap[B](f: A => MyStream[B]): MyStream[B]
@@ -22,7 +20,7 @@ object EmptyStream extends MyStream[Nothing] {
   def head: Nothing = throw new Exception("No head in empty Stream")
   def tail: MyStream[Nothing] = throw new Exception("No tail in empty Stream")
   def #::[B >: Nothing](element: B): MyStream[B] = new ConsStream(element, this)
-  def ++[B >: Nothing](another: MyStream[B]): MyStream[B] = another
+  def ++[B >: Nothing](another: => MyStream[B]): MyStream[B] = another
   def foreach(f: Nothing => Unit): Unit = ()
   def map[B](f: Nothing => B): MyStream[B] = this
   def flatMap[B](f: Nothing => MyStream[B]): MyStream[B] = this
@@ -38,7 +36,7 @@ class ConsStream[+A](hd: A, tl: => MyStream[A]) extends MyStream[A]{
 
   def isEmpty: Boolean = false
   def #::[B >: A](element: B): MyStream[B] = new ConsStream(element, this)
-  def ++[B >: A](another: MyStream[B]): MyStream[B] = new ConsStream[B](head, tail ++ another)
+  def ++[B >: A](another: =>  MyStream[B]): MyStream[B] = new ConsStream[B](head, tail ++ another)
   def foreach(f: A => Unit): Unit = {
     f(head)
     tail foreach f
