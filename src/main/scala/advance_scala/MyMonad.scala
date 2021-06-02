@@ -37,9 +37,4 @@ object MyMonad extends App {
   val g: Int => List[Int] = (x: Int) => List(2*x)
 
   val associative = List(1,2,3).flatMap(f).flatMap(g) == List(1,2,3).flatMap(x => f(x).flatMap(g))
-
-  //Monad law for options
-  val f1 : Int => Option[Int] = (x: Int) => Some(x * 2)
-
-  println(Option(1).flatMap(f1) == f1(1))
 }
