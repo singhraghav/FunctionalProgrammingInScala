@@ -132,7 +132,83 @@ object ThreadCommunication extends App {
     producer.start()
     consumer.start()
   }
-  prodConsLargeBuffer
+//  prodConsLargeBuffer
+
+  /*
+  * limited capacity buffer with multiple producer and multiple consumer acting on same buffer
+  * producer1 -> [ ? ? ? ? ] -> consumer1
+  * producer2 -> ^         ^ -> consumer2
+  * producer3 -> ^         ^ -> consumer3
+  * */
+
+  class Consumer(id: Int, buffer: mutable.Queue[Int]) extends Thread {
+    override def run(): Unit = {
+      val random = new Random()
+      while (true)
+      {
+        buffer.synchronized {
+          while (buffer.isEmpty){
+            println(s"[consumer $id] buffer empty, waiting ....")
+            buffer.wait()
+          }
+          // atleast one value is in buffer
+          val x = buffer.dequeue()
+          println(s"[consumer $id] consumed $x" )
+          buffer.notify()
+        }
+
+        Thread.sleep(random.nextInt(500))
+      }
+    }
+  }
+
+  class Producer(id: Int, buffer: mutable.Queue[Int], capacity: Int) extends Thread {
+    override def run(): Unit = {
+      val random = new Random()
+      var i = 0
+      while (true)
+      {
+        buffer.synchronized {
+          while(buffer.size == capacity){
+            println(s"[producer $id] buffer full, waiting ....")
+            buffer.wait()
+          }
+          // atleast one empty space in buffer
+          println(s"[producer $id] produced $i")
+          buffer.enqueue(i)
+          i += 1
+          buffer.notify()
+        }
+        Thread.sleep(random.nextInt(500))
+      }
+    }
+  }
+
+  /*
+  * notify can wake both producer and consumer and since we have multiple of both
+  * notify in consumer may awake the consumer so have an only if check will fail and same for producer
+  * */
+  def multipleProdConsLargeBuffer = {
+    val buffer: mutable.Queue[Int] = new mutable.Queue[Int]
+    val capacity = 3
+    val producer1 = new Producer(1, buffer, capacity)
+    val producer2 = new Producer(2, buffer, capacity)
+    val producer3 = new Producer(3, buffer, capacity)
+
+    val consumer1 = new Consumer(1, buffer)
+    val consumer2 = new Consumer(2, buffer)
+    val consumer3 = new Consumer(3, buffer)
+
+    producer1.start()
+    producer2.start()
+    producer3.start()
+
+    consumer1.start()
+    consumer2.start()
+    consumer3.start()
+  }
+
+  multipleProdConsLargeBuffer
 }
 
 
