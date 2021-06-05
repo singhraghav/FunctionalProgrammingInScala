@@ -80,6 +80,14 @@ object Intro extends App {
   }
 
   // use @volatile on a variable -> all reads and write to that variable are synchronized
-  //TODO:: exercise from 14: 42
 
+  def inceptionThread(maxThread: Int, index: Int = 1): Thread = new Thread(() => {
+    if (index < maxThread){
+      val newThread = inceptionThread(maxThread, index + 1)
+      newThread.start()
+      newThread.join()
+    }
+    println("I am thread " + index)
+  }
+  )
 }
