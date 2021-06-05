@@ -1,5 +1,8 @@
 package parralelism
 
+import scala.collection.mutable
+import scala.util.Random
+
 object ThreadCommunication extends App {
   /*
   the producer - consumer
@@ -68,5 +71,84 @@ object ThreadCommunication extends App {
     consumer.start()
     producer.start()
   }
-  smartProducerConsumer()
+//  smartProducerConsumer()
+
+  /*
+  producer fills up the buffer and consumer consumes from buffer
+  * producer -> [ ? ? ? ? ? ? ?] -> consumer
+  once the buffer is full producer must stop
+  once the buffer is empty the consumer must stop
+  *
+  * */
+
+  class BufferContainer{
+    var buffer = List.empty[Int]
+    val maxSize = 10
+    def isEmpty = buffer.isEmpty
+    def isFull = buffer.size == maxSize
+  }
+
+  def prodConsLargeBuffer = {
+    val buffer: mutable.Queue[Int] = new mutable.Queue[Int]
+    val capacity = 3
+    val consumer = new Thread(() => {
+      val random = new Random()
+      while (true)
+        {
+          buffer.synchronized {
+            if(buffer.isEmpty){
+              println("[consumer] buffer empty, waiting ....")
+              buffer.wait()
+            }
+            // atleast one value is in buffer
+            val x = buffer.dequeue()
+            println(s"[consumer] consumed $x" )
+            buffer.notify()
+          }
+
+          Thread.sleep(random.nextInt(500))
+        }
+    })
+
+    val producer = new Thread(() => {
+      val random = new Random()
+      var i = 0
+      while (true)
+      {
+        buffer.synchronized {
+          if(buffer.size == capacity){
+            println("[producer] buffer full, waiting ....")
+            buffer.wait()
+          }
+          // atleast one empty space in buffer
+          println(s"[producer] produced $i")
+          buffer.enqueue(i)
+          i += 1
+          buffer.notify()
+        }
+        Thread.sleep(random.nextInt(250))
+      }
+    })
+    producer.start()
+    consumer.start()
+  }
+  prodConsLargeBuffer
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
