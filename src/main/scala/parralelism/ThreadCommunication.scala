@@ -204,7 +204,51 @@ object ThreadCommunication extends App {
     consumer3.start()
   }
 
-  multipleProdConsLargeBuffer
+//  multipleProdConsLargeBuffer
+
+  //notify all
+  def testNotifyAll = {
+    val bell = new Object
+
+    (1 to 10).foreach(i => new Thread(() => {
+      bell.synchronized{
+        println(s"[thread $i] waiting")
+        bell.wait()
+        println(s"[thread $i] hooray!")
+      }
+    }).start())
+
+    new Thread(() => {
+      Thread.sleep(1000)
+      println(s"[announcer] threads assemble")
+      bell.synchronized(bell.notifyAll())
+    }).start()
+  }
+
+//  testNotifyAll
+
+  // deadlock
+  case class Friend(name: String){
+    def bow(other: Friend) = {
+      this.synchronized{
+        println(s"$name is bowing to ${other.name}")
+        other.rise(this)
+        print(s"$name: my friend ${other.name} has risen")
+      }
+    }
+
+    def rise(friend: Friend) = {
+      this.synchronized{
+        println(s"$name: I am rising to my friend ${friend.name}")
+      }
+    }
+  }
+
+  val sam = Friend("sam")
+  val pierre = Friend("pierre")
+
+  new Thread(() => sam.bow(pierre)).start()
+  new Thread(() => pierre.bow(sam)).start()
 }
 
 
