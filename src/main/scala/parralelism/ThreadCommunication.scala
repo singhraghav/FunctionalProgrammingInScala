@@ -242,13 +242,27 @@ object ThreadCommunication extends App {
         println(s"$name: I am rising to my friend ${friend.name}")
       }
     }
+    var side = "right"
+    def switchSide = if (side.equals("right")) side = "left" else "right"
+
+    def pass(other: Friend) = {
+      while (this.side == other.side) {
+        println(s"$this: oh, but $other feel free to pass ..")
+        switchSide
+        Thread.sleep(1000)
+      }
+    }
   }
 
   val sam = Friend("sam")
   val pierre = Friend("pierre")
 
-  new Thread(() => sam.bow(pierre)).start() // sam's bow is called and this thread has access to sam's lock | when it reaches to other.rise it tries to gain lock of pierce which is already blocked by second thread
-  new Thread(() => pierre.bow(sam)).start() // pierce bow is called and this thread has access to pierce lock | when it reaches to other.rise it tries to gain lock of sam's which is already blocked by first thread
+//  new Thread(() => sam.bow(pierre)).start() // sam's bow is called and this thread has access to sam's lock | when it reaches to other.rise it tries to gain lock of pierce which is already blocked by second thread
+//  new Thread(() => pierre.bow(sam)).start() // pierce bow is called and this thread has access to pierce lock | when it reaches to other.rise it tries to gain lock of sam's which is already blocked by first thread
+
+  // live lock -> both keeps on changing side to each other and both are locked -> so no thread is blocked because we dont use synchronized but both cant move ahead because side variable is same
+  new Thread(() => sam.pass(pierre)).start()
+  new Thread(() => pierre.pass(sam)).start()
 }
 
 
