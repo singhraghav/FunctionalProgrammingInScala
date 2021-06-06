@@ -247,8 +247,8 @@ object ThreadCommunication extends App {
   val sam = Friend("sam")
   val pierre = Friend("pierre")
 
-  new Thread(() => sam.bow(pierre)).start()
-  new Thread(() => pierre.bow(sam)).start()
+  new Thread(() => sam.bow(pierre)).start() // sam's bow is called and this thread has access to sam's lock | when it reaches to other.rise it tries to gain lock of pierce which is already blocked by second thread
+  new Thread(() => pierre.bow(sam)).start() // pierce bow is called and this thread has access to pierce lock | when it reaches to other.rise it tries to gain lock of sam's which is already blocked by first thread
 }
 
 
