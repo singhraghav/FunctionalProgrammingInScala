@@ -1,6 +1,6 @@
 package parralelism
 
-import java.util.concurrent.Executors
+import java.util.concurrent.{ExecutorService, Executors}
 
 object Intro extends App {
   // JVM threads
@@ -24,7 +24,7 @@ object Intro extends App {
   // executors -> Thread is very costly
   //so we create a thread pool instead of killing we reuse
 
-  val pool = Executors.newFixedThreadPool(10)
+  val pool: ExecutorService = Executors.newFixedThreadPool(10)
   pool.execute(() => {println("Something in thread pool")})
 
   pool.execute(() => {Thread.sleep(1000) ; println("Done after 1 second")})
