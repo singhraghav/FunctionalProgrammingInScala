@@ -3,7 +3,8 @@ package parralelism
 import parralelism.FuturesAndPromises.SocialNetwork.fetchBestFriend
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Random, Success, Try}
 
 object FuturesAndPromises extends App {
@@ -62,6 +63,36 @@ object FuturesAndPromises extends App {
   } yield markProfile.poke(bill)
 
   Thread.sleep(1000)
+
+  //banking app
+  case class User(name: String)
+  case class Transaction(sender: String, receiver: String, amount: Double, status: String)
+
+  object BankingApp {
+    val name = "JVM banking"
+
+    def fetchUser(name: String): Future[User] = Future {
+      Thread.sleep(400)
+      User(name)
+    }
+
+    def createTransaction(user: User, merchantName: String, amount: Double): Future[Transaction] = Future {
+      Thread.sleep(500)
+      Transaction(user.name, merchantName, amount, "Success")
+    }
+
+    def purchase(userName: String, item: String, merchantName: String, cost: Double): String = {
+      val transactionFuture = for{
+        user <- fetchUser(userName)
+        transaction <- createTransaction(user, merchantName, cost)
+      } yield transaction.status
+
+      Await.result(transactionFuture, 2.seconds)
+
+    }
+  }
+
+  println(BankingApp.purchase("Raghav", "iphone", "store", 3000))
 }
 
 
