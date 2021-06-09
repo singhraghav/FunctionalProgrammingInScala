@@ -4,7 +4,7 @@ import parralelism.FuturesAndPromises.SocialNetwork.fetchBestFriend
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, Future, Promise}
 import scala.util.{Failure, Random, Success, Try}
 
 object FuturesAndPromises extends App {
@@ -93,6 +93,20 @@ object FuturesAndPromises extends App {
   }
 
   println(BankingApp.purchase("Raghav", "iphone", "store", 3000))
+
+  // promises
+
+  val promise = Promise[Int]() // controller over future
+  val future = promise.future // future is under promise
+
+  //thread 1 - "consumer"
+
+  future.onComplete{
+    case Success(number) => println(number)
+  }
+
+  promise.success(10)
+  Thread.sleep(1000)
 }
 
 
