@@ -53,12 +53,14 @@ object FutureExercise extends App {
   // retryUntill
 
   def retryUntil[T](action: () => Future[T], condition: T => Boolean): Future[T] = {
-    action().flatMap{ result =>
-      if (condition(result)) {
-        Future.successful(result)
-      } else {
-        retryUntil(action, condition)
-      }
-    }.recoverWith(error => retryUntil(action, condition))
+//    action().flatMap{ result =>
+//      if (condition(result)) {
+//        Future.successful(result)
+//      } else {
+//        retryUntil(action, condition)
+//      }
+//    }.recoverWith(error => retryUntil(action, condition))
+
+    action().filter(condition).recoverWith{case _ => retryUntil(action, condition)}
   }
 }
