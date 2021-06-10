@@ -8,7 +8,7 @@ object Recap extends  App {
     case _ =>
   }
 
-  class Person(val name: String, val age: Int)
+  case class Person(val name: String, val age: Int)
 
   object Person {
     def unapply(person: Person): Option[(String, Int)] = Some((person.name, person.age))
