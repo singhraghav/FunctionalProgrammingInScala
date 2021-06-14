@@ -9,7 +9,7 @@ object intro extends App {
     def greet = s"Hi, my name is $name"
   }
 
-  implicit def toPerson(name: String): Person = Person(name)
+//  implicit def toPerson(name: String): Person = Person(name)
 
   println("Raghav".greet)
 
@@ -20,4 +20,8 @@ object intro extends App {
   implicit val defaultAmount = 100
 
   println(increment(10))
+
+  implicit class toPerson(name: String) {
+    implicit def greet = Person(name).greet
+  }
 }
