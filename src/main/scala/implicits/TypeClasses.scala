@@ -1,27 +1,26 @@
 package implicits
 
 object TypeClasses extends App {
-    trait HTMLWritable {
-      def toHtml: String
-    }
 
-  case class User(name: String, age: Int, email: String) extends HTMLWritable {
-    override def toHtml: String = s"<div>$name ($age yo) <a href=$email/> </div>"
-  }
-
-  val ragahv1 = User("Raghav", 32, "raghav@example.com")
-  val ragahv2 = User("Raghav", 42, "raghav@example.com")
   trait Equal[T] {
-    def equal(a: T, b: T): Boolean
+    def apply(first: T, second: T): Boolean
   }
 
-  object Equal {
-    def apply[T](a: T, b: T)(implicit equalizer: Equal[T]): Boolean = equalizer.equal(a, b)
+  object Equal{
+    def apply[T](first: T, second: T)(implicit equality: Equal[T]): Boolean = equality.apply(first, second)
+    def apply[T](implicit equality: Equal[T]) = equality
   }
 
-  implicit object NameEquality extends Equal[User] {
-    override def equal(a: User, b: User): Boolean = a.name.equals(b.name)
+  implicit object PersonEquality extends Equal[Person] {
+    override def apply(first: Person, second: Person): Boolean = first.name.equals(second.name) && first.age == second.age
   }
 
-  println(Equal(ragahv1, ragahv2))
+  case class Person(name: String, age: Int)
+
+  val person1 = Person("Raghav", 22)
+  val person2 = Person("Raghav", 22)
+
+  println(Equal(person1, person2))
+  println(Equal[Person].apply(person1, person2))
+
 }
