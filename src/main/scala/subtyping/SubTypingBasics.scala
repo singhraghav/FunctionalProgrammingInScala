@@ -38,4 +38,9 @@ object SubTypingBasics extends App {
   val vetForDog: Vet[Dog] = vetForEveryAnimal // This is possible because Vet is Contravariant
   // Vet[Animal] has become a subtype of Vet[Dog]
   vetForDog.heal(dog1)
+
+  /*
+  * use covariance -> you produce collection of things
+  * use contravariance -> you produce group of action  (when you use any action)
+  * */
 }
