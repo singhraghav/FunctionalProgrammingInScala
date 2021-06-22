@@ -65,5 +65,5 @@ object SubTypingBasics extends App {
     override def addAnimal(animal: Animal): Unit = ???
   }
 
-  catCage.addAnimal(new Tiger("ab"))
+//  catCage.addAnimal(new Tiger("ab"))
 }
