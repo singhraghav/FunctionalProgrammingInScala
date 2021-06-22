@@ -43,4 +43,27 @@ object SubTypingBasics extends App {
   * use covariance -> you produce collection of things
   * use contravariance -> you produce group of action  (when you use any action)
   * */
+
+  /*
+  * val in class parameters are covariant in posiiton and only accept covariant and Invariant type for generic Type
+  *var are contravariant when generic type is covariant
+  *var are in covariant position when generic type is contravariant
+  * var only works for invariant type
+  * method argument are in contravariant position
+  * method return types are in covariant position
+  * */
+
+  trait AnotherCovariantCage[+T]{
+    def addAnimal[T1 >: T](animal: T1)
+  }
+
+  trait AnotherContravariantCage[-T]{
+    def addAnimal(animal: T): Unit
+  }
+
+  val catCage: AnotherContravariantCage[Cat] = new AnotherContravariantCage[Animal] {
+    override def addAnimal(animal: Animal): Unit = ???
+  }
+
+  catCage.addAnimal(new Tiger("ab"))
 }
