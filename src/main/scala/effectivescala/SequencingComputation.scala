@@ -26,6 +26,11 @@ object SequencingComputation extends App {
       case End() => end
       case Cons(h, t) => cons(h, t.fold(end, cons))
     }
+
+    def map[B](f: A => B): LinkedList[B] = this match {
+      case End() => End()
+      case Cons(h, t) => Cons(f(h), t.map(f))
+    }
   }
   case class Cons[A](h: A, t: LinkedList[A]) extends LinkedList[A]
   case class End[A]() extends LinkedList[A]
@@ -59,5 +64,21 @@ object SequencingComputation extends App {
 
   case class Left[A, B](value: A) extends Sum[A, B]
   case class Right[A, B](value: B) extends Sum[A, B]
+
+  sealed trait MayBe[+A] {
+    def fold[B](empty: B)(f: A => B): B = this match {
+      case Empty => empty
+      case Full(v) => f(v)
+    }
+
+    def flatMap[B](f: A => MayBe[B]): MayBe[B] = this match {
+      case Empty => Empty
+      case Full(v) => f(v)
+    }
+  }
+  case class Full[A](value: A) extends MayBe[A]
+  case object Empty extends MayBe[Nothing]
+
+
 
 }
