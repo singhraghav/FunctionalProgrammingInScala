@@ -1,4 +1,5 @@
 package catspractice
+import cats.Functor
 import cats.syntax.functor._
 import cats.instances._
 
@@ -23,5 +24,26 @@ object Functors extends App{
   println(func4(123))
 
   //continue on page number 72
+  def doMath[F[_]](start: F[Int])(implicit functor: Functor[F]): F[Int] = start.map(n => n + 1 * 2)
+  final case class Box[A](value: A)
+  val box = Box[Int](123)
+
+  sealed trait Tree[+A]
+  final case class Branch[A](left: Tree[A], right: Tree[A])
+    extends Tree[A]
+  final case class Leaf[A](value: A) extends Tree[A]
+
+  implicit val treeFunctor: Functor[Tree] =
+    new Functor[Tree] {
+      override def map[A, B](fa: Tree[A])(f: A => B): Tree[B] =
+        fa match {
+          case Branch(left, right) =>
+            Branch(map(left)(f), map(right)(f))
+          case Leaf(value) =>
+            Leaf(f(value))
+        }
+    }
+
+  val t= Functor[Tree].map(Branch(Leaf(10), Leaf(20)))(v => v * 2)
 
 }
