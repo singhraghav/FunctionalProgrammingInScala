@@ -29,4 +29,9 @@ object Intro extends App{
   implicit val carEq: Eq[ToyCar] = Eq.instance[ToyCar]((car1, car2) => car1.price === car2.price)
 
   println(ToyCar("1", 10) === ToyCar("2", 10))
+
+  val option1: Option[Int]= Some(2)
+  val option2:Option[Int] = None
+
+  val result: Option[Int] = option1.flatMap(a => option2.map(ba => ba/a))
 }
