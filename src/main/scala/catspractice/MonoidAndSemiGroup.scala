@@ -33,4 +33,17 @@ object MonoidAndSemiGroup extends App{
   def reduce[A](l : List[A])(implicit s: Semigroup[A]): A = l.reduce(s.combine)
 
   println(intCombination)
+
+  case class Expense(id: Long, amount: Double)
+
+  implicit val expenseSemigroup = Semigroup.instance[Expense]((e1, e2) => Expense(e1.id + e2.id, e1.amount + e2.amount))
+
+  println(reduce(List(Expense(1, 2), Expense(3, 4), Expense(5, 6))))
+
+  import cats.syntax.semigroup._
+  val combinedExpense = Expense(1, 2) |+| Expense(3, 4)
+
+  println(combinedExpense)
+
+  def reduceThings2[T](l: List[T])(implicit s: Semigroup[T]): T = l.reduce(_ |+| _)
 }
