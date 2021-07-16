@@ -23,4 +23,10 @@ object Monad extends App{
   //compressed ETW
   val upperSafeStr2 = safeString.flatMap(s => SafeValue(s.toUpperCase()))
 
+//D:\Tutorials
+  println(os.root)
+
+  val dRoot = os.Path("D:\\")
+  val tutorialsPath = os.Path("Tutorials", base = dRoot)
+  println(os.list(tutorialsPath))
 }

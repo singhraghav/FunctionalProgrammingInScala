@@ -22,4 +22,15 @@ object MonoidAndSemiGroup extends App{
   }
 
   println(add(List(Order(1,2), Order(2, 3), Order(3, 4))))
+
+  import cats.Semigroup
+  import cats.instances.int._
+
+  val naturalIntSemiGroup = Semigroup[Int]
+
+  val intCombination = naturalIntSemiGroup.combine(2, 46)
+
+  def reduce[A](l : List[A])(implicit s: Semigroup[A]): A = l.reduce(s.combine)
+
+  println(intCombination)
 }
