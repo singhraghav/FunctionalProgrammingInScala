@@ -12,5 +12,5 @@ object Collections {
     c <- opt3
   } yield a + b + c
 
-
+  val l: Int = List(1, 2, 3).fold(0)(_ + _)
 }
