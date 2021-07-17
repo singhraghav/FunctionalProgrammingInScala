@@ -44,8 +44,8 @@ object MonadTransformers extends App{
   type AsyncResponse[T] = EitherT[Future, String, T]
 
   def getBandWidth(server: String): AsyncResponse[Int] = bandWidth.get(server) match {
-    case None => EitherT(Future.successful[Either[String, Int]](Left(s"Server $server unavailable")))
-    case Some(v) => EitherT(Future.successful[Either[String, Int]](Right(v)))
+    case None => EitherT(Future[Either[String, Int]](Left(s"Server $server unavailable")))
+    case Some(v) => EitherT(Future[Either[String, Int]](Right(v)))
   }
 
   def canWithStandSurge(s1: String, s2: String): AsyncResponse[Boolean] = {
