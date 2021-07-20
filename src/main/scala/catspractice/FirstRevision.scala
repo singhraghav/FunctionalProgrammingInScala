@@ -1,5 +1,9 @@
 package catspractice
 
+import cats.MonadError
+
+import scala.util.Try
+
 object FirstRevision extends App {
 
   sealed trait MyList[+T]{
@@ -140,6 +144,19 @@ object FirstRevision extends App {
   } yield a1 + a2 + a3
 
   println(allDogs.run(List()).value)
+
+  type ErrorOr[A] = Either[String, A]
+
+  val F = MonadError[ErrorOr, String]
+
+  val right: ErrorOr[String] = F.pure("correct value")
+  val left: ErrorOr[String] = F.raiseError("Error")
+  import cats.instances.try_._
+
+  val F1 = MonadError[Try, Throwable]
+
+
+
 
 
 
