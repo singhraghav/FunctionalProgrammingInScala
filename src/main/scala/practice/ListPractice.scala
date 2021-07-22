@@ -8,6 +8,7 @@ sealed abstract class RList[+T] {
   def tail: RList[T]
   def isEmpty: Boolean
   def ::[T1 >: T](element: T1): RList[T1] = new ::(element, this)
+  def apply(index: Int): T
 }
 
 case object RNil extends RList[Nothing] {
@@ -21,12 +22,26 @@ case object RNil extends RList[Nothing] {
 
   override def toString: String = "[]"
 
+  override def apply(index: Int): Nothing = throw new NoSuchElementException
 }
 
 case class ::[+T](override val head: T, override val tail: RList[T]) extends RList[T] {
   override def isEmpty: Boolean = false
 
   override def headOption: Option[T] = Some(head)
+
+  override def apply(index: Int): T = {
+    @tailrec
+    def applyTailRec(remaining: RList[T], currentIndex: Int): T = {
+      if(currentIndex == index)
+        remaining.head
+      else applyTailRec(remaining.tail, currentIndex + 1)
+    }
+    if(index < 0)
+      throw new NoSuchElementException
+    else
+      applyTailRec(this, 0)
+  }
 
   override def toString: String = {
     @tailrec
@@ -50,5 +65,6 @@ object RList{
 }
 
 object ListPractice extends App {
-    println(1 :: 2 :: 3 :: 4 :: RNil)
+  val list = RList(1, 2, 3, 4, 5)
+    println(list(4))
 }
