@@ -36,6 +36,11 @@ object IntByteEncoder extends ByteEncoder[Int] {
     bb.putInt(a)
     bb.array()
   }
+
+  implicit def optionEncoder[A](implicit encA: ByteEncoder[A]): ByteEncoder[Option[A]] = {
+    case None => Array[Byte]()
+    case Some(value) => encA.encode(value)
+  }
 }
 
 object StringByteEncoder extends ByteEncoder[String] {
@@ -45,3 +50,19 @@ object StringByteEncoder extends ByteEncoder[String] {
 // can be instance for every type
 // cleaner interface
 // several implementation possible
+
+trait ByteDecoder[A] {
+  def decode(a: Array[Byte]): Option[A]
+}
+
+trait ByteCodec[A] extends ByteEncoder[A] with ByteDecoder[A] {
+  def isomorphism(a: A): Boolean = decode(encode(a)).exists(_.equals(a))
+}
+
+
+
+
+
+
+
+
