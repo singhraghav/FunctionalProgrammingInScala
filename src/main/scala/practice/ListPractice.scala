@@ -9,6 +9,8 @@ sealed abstract class RList[+T] {
   def isEmpty: Boolean
   def ::[T1 >: T](element: T1): RList[T1] = new ::(element, this)
   def apply(index: Int): T
+  def length: Int
+  def reverse: RList[T]
 }
 
 case object RNil extends RList[Nothing] {
@@ -23,6 +25,10 @@ case object RNil extends RList[Nothing] {
   override def toString: String = "[]"
 
   override def apply(index: Int): Nothing = throw new NoSuchElementException
+
+  override def length: Int = 0
+
+  override def reverse: RList[Nothing] = this
 }
 
 case class ::[+T](override val head: T, override val tail: RList[T]) extends RList[T] {
@@ -54,6 +60,22 @@ case class ::[+T](override val head: T, override val tail: RList[T]) extends RLi
     "[" + toStringTailRec(this, "") + "]"
   }
 
+  override def length: Int = {
+    @tailrec
+    def loop(len: Int, remaining: RList[T]): Int =
+      if (remaining == RNil) len
+      else loop(len + 1, remaining.tail)
+
+    loop(0, this)
+  }
+
+  override def reverse: RList[T] = {
+    @tailrec
+    def loop(acc: RList[T], remaining: RList[T]): RList[T] =
+      if (remaining == RNil) acc
+      else loop(remaining.head :: acc, remaining.tail)
+    loop(RNil, this)
+  }
 }
 
 object RList{
@@ -62,9 +84,18 @@ object RList{
       RNil
     else
       elements.head :: apply(elements.tail:_*)
+
+  def from[T](iterable: Iterable[T]): RList[T] = {
+    @tailrec
+    def loop(acc: RList[T], remaining: Iterable[T]): RList[T] =
+      if (remaining.isEmpty) acc
+      else loop(remaining.head :: acc, remaining.tail)
+    loop(RNil, iterable).reverse
+  }
 }
 
 object ListPractice extends App {
   val list = RList(1, 2, 3, 4, 5)
-    println(list(4))
+    println(list.reverse)
+  println(RList.from(1 to 10))
 }
