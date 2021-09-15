@@ -11,6 +11,10 @@ sealed abstract class RList[+T] {
   def apply(index: Int): T
   def length: Int
   def reverse: RList[T]
+
+  def ++[T1 >: T](another: RList[T1]): RList[T1]
+
+  def removeAt(index: Int): RList[T]
 }
 
 case object RNil extends RList[Nothing] {
@@ -29,6 +33,10 @@ case object RNil extends RList[Nothing] {
   override def length: Int = 0
 
   override def reverse: RList[Nothing] = this
+
+  override def ++[T1 >: Nothing](another: RList[T1]): RList[T1] = another
+
+  override def removeAt(index: Int): RList[Nothing] = this
 }
 
 case class ::[+T](override val head: T, override val tail: RList[T]) extends RList[T] {
@@ -76,6 +84,28 @@ case class ::[+T](override val head: T, override val tail: RList[T]) extends RLi
       else loop(remaining.head :: acc, remaining.tail)
     loop(RNil, this)
   }
+
+  override def ++[T1 >: T](another: RList[T1]): RList[T1] = {
+    @tailrec
+    def loop(acc: RList[T1], remaining: RList[T1]): RList[T1] =
+      if (remaining.isEmpty) acc
+      else loop(remaining.head :: acc, remaining.tail)
+
+    loop(another, this.reverse)
+  }
+
+  override def removeAt(index: Int): RList[T] = {
+    @tailrec
+    def loop(acc: RList[T], remaining: RList[T], k: Int): RList[T] = {
+      if(remaining.isEmpty || k < 0) this
+      else if(k == 0)
+        acc.reverse ++ remaining.tail
+      else
+        loop(remaining.head :: acc, remaining.tail, k -1)
+    }
+
+    loop(RNil, this, index)
+  }
 }
 
 object RList{
@@ -96,6 +126,9 @@ object RList{
 
 object ListPractice extends App {
   val list = RList(1, 2, 3, 4, 5)
-    println(list.reverse)
-  println(RList.from(1 to 10))
+//    println(list.reverse)
+//  println(RList.from(1 to 10))
+
+  println((RList(1,2,3) ++ RList(4,5,6)).removeAt(5))
+
 }
