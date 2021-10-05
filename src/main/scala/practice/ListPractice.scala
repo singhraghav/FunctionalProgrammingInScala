@@ -15,6 +15,11 @@ sealed abstract class RList[+T] {
   def ++[T1 >: T](another: RList[T1]): RList[T1]
 
   def removeAt(index: Int): RList[T]
+  def map[S](f: T => S): RList[S]
+  def flatMap[S](f: T => RList[S]): RList[S]
+  def filter(f: T => Boolean): RList[T]
+
+  def rle: RList[(T, Int)]
 }
 
 case object RNil extends RList[Nothing] {
@@ -37,6 +42,14 @@ case object RNil extends RList[Nothing] {
   override def ++[T1 >: Nothing](another: RList[T1]): RList[T1] = another
 
   override def removeAt(index: Int): RList[Nothing] = this
+
+  override def map[S](f: Nothing => S): RList[S] = this
+
+  override def filter(f: Nothing => Boolean): RList[Nothing] = this
+
+  override def flatMap[S](f: Nothing => RList[S]): RList[S] = this
+
+  override def rle: RList[(Nothing, Int)] = this
 }
 
 case class ::[+T](override val head: T, override val tail: RList[T]) extends RList[T] {
@@ -106,6 +119,53 @@ case class ::[+T](override val head: T, override val tail: RList[T]) extends RLi
 
     loop(RNil, this, index)
   }
+
+  override def map[S](f: T => S): RList[S] = {
+    @tailrec
+    def loop(acc: RList[S], remaining: RList[T]): RList[S] =
+      if (remaining.isEmpty) acc
+      else
+        loop(f(remaining.head) :: acc, remaining.tail)
+    loop(RNil, this).reverse
+  }
+
+  override def flatMap[S](f: T => RList[S]): RList[S] = {
+    @tailrec
+    def loop(acc: RList[S], pending: RList[T]): RList[S] =
+      if (pending.isEmpty) acc
+      else
+        loop((f(pending.head).reverse ++ acc), pending.tail)
+
+    loop(RNil, this).reverse
+  }
+
+  override def filter(f: T => Boolean): RList[T] = {
+    @tailrec
+    def loop(acc: RList[T], remaining: RList[T]): RList[T] =
+      if (remaining.isEmpty) acc
+      else
+        loop(if(f(remaining.head)) remaining.head :: acc else  acc, remaining.tail)
+
+    loop(RNil, this).reverse
+  }
+
+  override def rle: RList[(T, Int)] = {
+    @tailrec
+    def loop(acc: RList[(T, Int)], pending: RList[T]): RList[(T, Int)] =
+      if (pending.isEmpty) acc
+      else {
+        acc match {
+          case h :: tail =>
+            if(h._1 == pending.head)
+              loop((h._1, h._2 + 1) :: tail, pending.tail)
+            else
+              loop((pending.head, 1) :: acc, pending.tail)
+          case _ => loop((pending.head, 1) :: acc, pending.tail)
+        }
+      }
+
+    loop(RNil, this).reverse
+  }
 }
 
 object RList{
@@ -125,10 +185,11 @@ object RList{
 }
 
 object ListPractice extends App {
-  val list = RList(1, 2, 3, 4, 5)
+  val list = RList(1, 1, 2, 2, 3, 3, 3, 4, 3, 5, 5, 5)
 //    println(list.reverse)
 //  println(RList.from(1 to 10))
 
-  println((RList(1,2,3) ++ RList(4,5,6)).removeAt(5))
-
+//  println((RList(1,2,3) ++ RList(4,5,6)).removeAt(5))
+// println(RList(1, 2, 3).flatMap(e => RList(e * 2, e * 4)))
+  println(list.rle)
 }
