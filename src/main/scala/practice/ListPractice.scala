@@ -20,9 +20,13 @@ sealed abstract class RList[+T] {
   def filter(f: T => Boolean): RList[T]
 
   def rle: RList[(T, Int)]
+  def duplicateEach(n: Int): RList[T]
 }
 
 case object RNil extends RList[Nothing] {
+
+  override def duplicateEach(n: Int): RList[Nothing] = this
+
   override def isEmpty: Boolean = true
 
   override def tail: RList[Nothing] = throw new NoSuchElementException
@@ -53,6 +57,23 @@ case object RNil extends RList[Nothing] {
 }
 
 case class ::[+T](override val head: T, override val tail: RList[T]) extends RList[T] {
+
+  override def duplicateEach(n: Int): RList[T] = {
+    @tailrec
+    def loop(acc: RList[T], pending: RList[T], count: Int): RList[T] = {
+      if(pending.isEmpty)
+        acc
+      else {
+        if(count == 0)
+          loop(acc, pending.tail, n)
+        else
+          loop(pending.head :: acc, pending, count - 1)
+      }
+    }
+    if(n <= 1) this
+    else
+    loop(RNil, this, n).reverse
+  }
   override def isEmpty: Boolean = false
 
   override def headOption: Option[T] = Some(head)
@@ -191,5 +212,7 @@ object ListPractice extends App {
 
 //  println((RList(1,2,3) ++ RList(4,5,6)).removeAt(5))
 // println(RList(1, 2, 3).flatMap(e => RList(e * 2, e * 4)))
-  println(list.rle)
+//  println(list.rle)
+
+  println(RList(1,2,3).duplicateEach(2))
 }
