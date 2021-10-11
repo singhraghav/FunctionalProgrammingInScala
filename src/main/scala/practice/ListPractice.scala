@@ -22,9 +22,13 @@ sealed abstract class RList[+T] {
   def rle: RList[(T, Int)]
   def duplicateEach(n: Int): RList[T]
   def rotateLeft(n: Int): RList[T]
+
+  def insertionSorted[T1 >: T](ordering: Ordering[T1]): RList[T1]
 }
 
 case object RNil extends RList[Nothing] {
+
+  override def insertionSorted[T1 >: Nothing](ordering: Ordering[T1]): RList[T1] = this
 
   override def rotateLeft(n: Int): RList[Nothing] = this
 
@@ -60,6 +64,35 @@ case object RNil extends RList[Nothing] {
 }
 
 case class ::[+T](override val head: T, override val tail: RList[T]) extends RList[T] {
+
+  override def insertionSorted[T1 >: T](ordering: Ordering[T1]): RList[T1] = {
+    @tailrec
+    def loop(newList: RList[T1], pending: RList[T1]): RList[T1] = {
+      pending match {
+        case RNil => newList
+        case h :: t => loop(addElementToCorrectPlace(RNil, newList, h)(ordering), t)
+      }
+    }
+
+    @tailrec
+    def addElementToCorrectPlace(acc: RList[T1], newList: RList[T1], currentElement: T1)(ordering: Ordering[T1]): RList[T1] = {
+      newList match {
+        case h :: _  =>
+          if (ordering.lteq(currentElement, h))
+            addAllAccumulatedElementsBackToNewList(acc, currentElement :: newList)
+          else
+            addElementToCorrectPlace(h :: acc, newList.tail, currentElement)(ordering)
+        case RNil => addAllAccumulatedElementsBackToNewList(acc, currentElement :: newList)
+      }
+    }
+
+    @tailrec
+    def addAllAccumulatedElementsBackToNewList(acc: RList[T1], newList: RList[T1]): RList[T1] =
+      if (acc.isEmpty) newList
+      else addAllAccumulatedElementsBackToNewList(acc.tail, acc.head :: newList)
+
+    loop(RNil, this)
+  }
 
   override def rotateLeft(n: Int): RList[T] = {
     @tailrec
@@ -221,13 +254,12 @@ object RList{
 }
 
 object ListPractice extends App {
-  val list = RList(1, 1, 2, 2, 3, 3, 3, 4, 3, 5, 5, 5)
+  val list = RList(5, 4, 3, 1, 2, 7)
 //    println(list.reverse)
 //  println(RList.from(1 to 10))
 
 //  println((RList(1,2,3) ++ RList(4,5,6)).removeAt(5))
 // println(RList(1, 2, 3).flatMap(e => RList(e * 2, e * 4)))
 //  println(list.rle)
-
-  println(RList(1,2,3).rotateLeft(5))
+    println(list.insertionSorted(Ordering.Int))
 }
